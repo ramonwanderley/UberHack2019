@@ -6,12 +6,14 @@ exports.handler = async (event) => {
 
     var operation;
     var id;
+    var keyReceived;
     if (event.body !== null && event.body !== undefined) {
         let body = JSON.parse(event.body);
         operation = body.operation;
         id = body.id;
+        keyReceived = body.key;
     }
-    
+
     var payloadUpdate = {
         TableName: "uberhack-cars",
         Key: {
@@ -23,25 +25,37 @@ exports.handler = async (event) => {
         },
         ReturnValues:"UPDATED_NEW"
     };
-    var payloadUnlock = {
+    var payloadGetKey = {
         TableName: "uberhack-cars",
         Key:{
             "id": id
         },
         AttributesToGet: [
-            'endTime',
-
+            'key'
+        ],
+    };
+    var payloadGetAvailable = {
+        TableName: "uberhack-cars",
+        Key:{
+            "id": id
+        },
+        AttributesToGet: [
+            'available'
         ],
     };
     var result;
-    
+    var dbKey;
+    console.log(keyReceived)
     switch (operation) {
-        case 'key':
-            result = await dynamo.getItem(payloadUnlock).promise();
-            result = result.Item;
+        case 'available':
+            result = await dynamo.getItem(payloadGetAvailable).promise();
+            
+            result = result.Item.available;
             break;
         case 'unlock':
-            result = await dynamo.updateItem(payloadUpdate).promise();
+            dbKey = await dynamo.getItem(payloadGetKey).promise();
+            if (keyReceived == dbKey.Item.key ) result = await dynamo.updateItem(payloadUpdate).promise();
+            else result = "Unlock failed";
             break;
         case 'list':
             result = await dynamo.scan({"TableName": "uberhack-cars"}).promise();

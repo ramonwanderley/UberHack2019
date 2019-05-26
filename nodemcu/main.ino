@@ -1,3 +1,27 @@
+/*
+ ESP8266WiFi.cpp - WiFi library for esp8266
+
+ Copyright (c) 2014 Ivan Grokhotkov. All rights reserved.
+ This file is part of the esp8266 core for Arduino environment.
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+ Reworked on 28 Dec 2015 by Markus Sattler
+
+ */
+
 #include "ESP8266WiFi.h"
 
 extern "C" {
@@ -15,6 +39,15 @@ extern "C" {
 
 #include "debug.h"
 
+// -----------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------- Debug ------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------------------------
+
+
+/**
+ * Output WiFi settings to an object derived from Print interface (like Serial).
+ * @param p Print interface
+ */
 void ESP8266WiFiClass::printDiag(Print& p) {
     const char* modes[] = { "NULL", "STA", "AP", "STA+AP" };
     p.print("Mode: ");
@@ -64,6 +97,29 @@ void ESP8266WiFiClass::printDiag(Print& p) {
 
 ESP8266WiFiClass WiFi;
 
+/**
+ * ESP8266HTTPClient.cpp
+ *
+ * Created on: 02.11.2015
+ *
+ * Copyright (c) 2015 Markus Sattler. All rights reserved.
+ * This file is part of the ESP8266HTTPClient for Arduino.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
 #include <Arduino.h>
 
 #include "ESP8266HTTPClient.h"
@@ -1503,6 +1559,8 @@ int HTTPClient::returnError(int error)
 uint8_t LED_Pin = D1;
 void setup() {
     pinMode(LED_Pin,OUTPUT);
+    pinMode(D5,OUTPUT);
+
 
   Serial.begin(115200);                            //Serial connection
   WiFi.begin("Eventos", "&v3nt0s2017");   //WiFi connection
@@ -1540,13 +1598,13 @@ void loop() {
     Serial.print(payload);
     if (payload[0] == '0') 
     { 
-      digitalWrite(LED_Pin,LOW);
-      digitalWrite(D0,HIGH);
+      digitalWrite(LED_Pin,HIGH);
+      digitalWrite(D5,LOW);
     }
     else if (payload[0] == '1') 
     { 
-      digitalWrite(LED_Pin,HIGH);
-      digitalWrite(D0,LOW);
+      digitalWrite(LED_Pin,LOW);
+      digitalWrite(D5,HIGH);
     }
     http.end();  //Close connection
  
@@ -1556,6 +1614,6 @@ void loop() {
  
   }
  
-  delay(1000);
+  delay(500);
  
 }
