@@ -10,7 +10,7 @@
   <router-view></router-view>
   <GmapMap
       ref="mapRef"
-      :center="{lat:10, lng:10}"
+      :center="{lat:-8.0538900	, lng: -34.8811100}"
       :zoom="15"
       map-type-id="terrain"
       style="width: 100%; height: 100%"
@@ -29,7 +29,7 @@
       <v-bottom-sheet v-model="call" ref="bottom" >
       <v-card
     class="mx-auto"
-    color="#26c6da"
+    color="#47CA58"
     dark
     max-width="100%"
   >
@@ -39,7 +39,7 @@
               fab
               top
               right
-              color="pink"
+              color="#16e206"
               @click="readQRCode"
             >
         
@@ -124,20 +124,21 @@ export default {
        this.personMark = new google.maps.Marker({
           map: map,
           title: 'Hello World!',
+          animation: google.maps.Animation.DROP,
         });
         var infoWindow = this.personMark
         this.map = map
         
         google.maps.event.addListener(this.personMark, 'click', this.markerClicked() );
     
-        // Try HTML5 geolocation.
+        //Tentativa de localização pelo HTML5
         if ('geolocation' in navigator) {
           navigator.geolocation.getCurrentPosition(function(position) {
             var pos = {
               lat: position.coords.latitude,
               lng: position.coords.longitude
             };
-
+            //centralização da tela no usuário
             infoWindow.setPosition(pos);   
             map.setCenter(pos);
             navigator.geolocation.watchPosition(myParent.updateUserPosition)
@@ -147,21 +148,21 @@ export default {
             );
       } 
       else {
-          // Browser doesn't support Geolocation
-          console.log('error')
+          // Quando o browser não tem suporte pra HTML
           handleLocationError(false, infoWindow, map.getCenter());
       }
     }) 
       this.$refs.mapRef.$mapPromise.then((map) => {  
           axios.post('https://x647przbde.execute-api.us-east-1.amazonaws.com/default',{operation: "list"})
             .then(response => {
-              console.log(response)
               const cars = response.data.Items
               for (var carIndex = 0; carIndex < cars.length; carIndex++ ){
                 this.carsInfo.push(cars[carIndex])
                 this.carMasks.push( new google.maps.Marker({
                   map: map,
+                  animation: google.maps.Animation.DROP,
                   title: 'Car ' + carIndex,
+                  icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
                   position:{
                     lat: cars[carIndex].coordinates.lat,
                     lng: cars[carIndex].coordinates.lon
@@ -183,7 +184,6 @@ export default {
       var date = new Date(this.selectCar.startTime*1000);
       var day = date.getDate()
       var month = date.getMonth()
-      console.log(day)
       var hours = date.getHours();
       var minutes = "0" + date.getMinutes();
       return( day+ "/" + month + ", " + hours + ':' + minutes.substr(-2))
@@ -211,7 +211,7 @@ export default {
     readQRCode(){
         router.push({ name: 'qrcode', params: { carId: this.selectCar.id }})
     },
-    updateUserPosition(location, verb){
+    updateUserPosition(location){
       var pos = {
               lat: location.coords.latitude,
               lng: location.coords.longitude
@@ -223,8 +223,6 @@ export default {
     markerClicked(index){
     this.selectCar = this.carsInfo[index -1 ]
      this.call = true
-     console.log(index)
-    
     }
   },
 
