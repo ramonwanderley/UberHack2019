@@ -2,7 +2,6 @@
   <v-app id="app"  data-app=true>
     <v-toolbar app dark color="#47CA58" >
     <v-toolbar-side-icon @click="drawer = !drawer"></v-toolbar-side-icon>
-
     <v-toolbar-title class="white--text">Mão Dupla</v-toolbar-title>
     <v-spacer></v-spacer>
     
@@ -75,3 +74,11 @@ import router from './router'
   },
   }
 </script>
+
+<style>
+
+.logoToolBar{
+  width: 50px;
+  height: 50px;
+}
+</style>
