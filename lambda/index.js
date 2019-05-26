@@ -4,21 +4,44 @@ const dynamo = new doc.DynamoDB();
 
 exports.handler = async (event) => {
 
-    const operation = event.operation;
-    const payload = event.payload;
-
-    if (event.tableName) {
-        payload.TableName = event.tableName;
+    var operation;
+    var id;
+    if (event.body !== null && event.body !== undefined) {
+        let body = JSON.parse(event.body);
+        operation = body.operation;
+        id = body.id;
     }
     
+    var payloadUpdate = {
+        TableName: "uberhack-cars",
+        Key: {
+            "id": id
+        },
+        UpdateExpression: "set available = :x",
+        ExpressionAttributeValues: {
+            ":x": 0,
+        },
+        ReturnValues:"UPDATED_NEW"
+    };
+    var payloadUnlock = {
+        TableName: "uberhack-cars",
+        Key:{
+            "id": id
+        },
+        AttributesToGet: [
+            'endTime',
+
+        ],
+    };
     var result;
     
     switch (operation) {
-        case 'update':
-            result = await dynamo.updateItem(payload).promise();
+        case 'key':
+            result = await dynamo.getItem(payloadUnlock).promise();
+            result = result.Item;
             break;
-        case 'delete':
-            result = await dynamo.deleteItem(payload).promise();
+        case 'unlock':
+            result = await dynamo.updateItem(payloadUpdate).promise();
             break;
         case 'list':
             result = await dynamo.scan({"TableName": "uberhack-cars"}).promise();
@@ -29,12 +52,14 @@ exports.handler = async (event) => {
     }
     
     var response = {
-        "statusCode": 200,
-        "headers": {
+        statusCode: 200,
+        headers: {
+           'Content-Type': 'application/json', 
            'Access-Control-Allow-Origin': '*'
         },
-        "body": JSON.stringify(result),
+        body: JSON.stringify(result),
     };
+ 
     
     return response;
 };
