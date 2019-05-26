@@ -1,50 +1,14 @@
 <template>
-  <v-app>
-    <v-toolbar app dark color="#5054F0" >
-    <v-toolbar-side-icon @click="drawer = !drawer"></v-toolbar-side-icon>
-
-    <v-toolbar-title class="white--text">Mão Dupla</v-toolbar-title>
-    <v-spacer></v-spacer>
-    
-  </v-toolbar>
-   <v-navigation-drawer
-      v-model="drawer"
-      absolute
-      temporary
-    >
-      <v-list class="pa-1">
-        <v-list-tile avatar>
-          <v-list-tile-avatar>
-            <img src="https://randomuser.me/api/portraits/men/85.jpg">
-          </v-list-tile-avatar>
-
-          <v-list-tile-content>
-            <v-list-tile-title>John Leider</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
-
-      <v-list class="pt-0" dense>
-        <v-divider></v-divider>
-
-        <v-list-tile
-          v-for="item in items"
-          :key="item.title"
-          @click=""
-        >
-          <v-list-tile-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-tile-action>
-
-          <v-list-tile-content>
-            <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
-    </v-navigation-drawer>
-
-    <v-content>
-      <GmapMap
+<v-container 
+    justify-start
+    align-start
+    fluid
+    width="100%"
+    height="100%"
+     class="View pa-0 ma-0"
+     style="height: 100%">
+  <router-view></router-view>
+  <GmapMap
       ref="mapRef"
       :center="{lat:10, lng:10}"
       :zoom="15"
@@ -63,42 +27,6 @@
     >
      </GmapMap>
       <v-bottom-sheet v-model="call" ref="bottom" >
-      <!-- <v-card tile>
-        <v-progress-linear
-          :value="50"
-          class="my-0"
-          height="3"
-        ></v-progress-linear>
-
-        <v-list>
-          <v-list-tile>
-            <v-list-tile-content>
-              <v-list-tile-title>{{selectCar.model}}</v-list-tile-title>
-              <v-list-tile-sub-title>Fitz & The Trantrums</v-list-tile-sub-title>
-            </v-list-tile-content>
-
-            <v-spacer></v-spacer>
-
-            <v-list-tile-action>
-              <v-btn icon>
-                <v-icon>fast_rewind</v-icon>
-              </v-btn>
-            </v-list-tile-action>
-
-            <v-list-tile-action :class="{ 'mx-5': $vuetify.breakpoint.mdAndUp }">
-              <v-btn icon>
-                <v-icon>pause</v-icon>
-              </v-btn>
-            </v-list-tile-action>
-
-            <v-list-tile-action :class="{ 'mr-3': $vuetify.breakpoint.mdAndUp }">
-              <v-btn icon>
-                <v-icon>fast_forward</v-icon>
-              </v-btn>
-            </v-list-tile-action>
-          </v-list-tile>
-        </v-list>
-      </v-card> -->
       <v-card
     class="mx-auto"
     color="#26c6da"
@@ -114,6 +42,7 @@
               color="pink"
               @click="readQRCode"
             >
+        
               <v-icon>vpn_key</v-icon>
             </v-btn>
     <v-card-title>
@@ -156,13 +85,11 @@
     </v-card-actions>
   </v-card>
     </v-bottom-sheet>
-    </v-content>
-  </v-app>
+</v-container>
 </template>
 
 <script>
-
-import HelloWorld from './components/HelloWorld'
+import router from '../router'
 import axios from 'axios'
 function getUserMedia(options, successCallback, failureCallback) {
   var api = navigator.getUserMedia || navigator.webkitGetUserMedia ||
@@ -174,7 +101,6 @@ function getUserMedia(options, successCallback, failureCallback) {
 export default {
   name: 'App',
   components: {
-    HelloWorld
   },
   data () {
     return {
@@ -193,7 +119,7 @@ export default {
     }
   },
   mounted() {
-  var meuPai = this
+  var myParent = this
   this.$refs.mapRef.$mapPromise.then((map) => {  
        this.personMark = new google.maps.Marker({
           map: map,
@@ -214,7 +140,7 @@ export default {
 
             infoWindow.setPosition(pos);   
             map.setCenter(pos);
-            navigator.geolocation.watchPosition(meuPai.updateUserPosition)
+            navigator.geolocation.watchPosition(myParent.updateUserPosition)
           }, function (error) {
             },
             {timeout:10000}
@@ -243,7 +169,7 @@ export default {
                   })
                 );
                 google.maps.event.addListener(this.carMasks[carIndex], 'click', () => {
-                  meuPai.markerClicked(carIndex)
+                  myParent.markerClicked(carIndex)
                 });
               }
             }
@@ -251,6 +177,7 @@ export default {
       })      
   },
   computed: {
+    
     startDate(){
       if(this.selectCar.startTime != undefined ){
       var date = new Date(this.selectCar.startTime*1000);
@@ -282,30 +209,7 @@ export default {
   methods: {
     
     readQRCode(){
-      console.log('dale')
-      if (!navigator.getUserMedia && !navigator.webkitGetUserMedia &&
-    !navigator.mozGetUserMedia && !navigator.msGetUserMedia) {
-    alert('User Media API not supported.');
-    return;
-  }
-  
-  var constraints = {
-    video: true
-  };
-
-  getUserMedia(constraints, function (stream) {
-    var mediaControl = document.querySelector('video');
-    if ('srcObject' in mediaControl) {
-      mediaControl.srcObject = stream;
-      mediaControl.src = (window.URL || window.webkitURL).createObjectURL(stream);
-    } else if (navigator.mozGetUserMedia) {
-      mediaControl.mozSrcObject = stream;
-    }
-    theStream = stream;
-  }, function (err) {
-    alert('Error: ' + err);
-  });
-  
+        router.push({ name: 'qrcode', params: { carId: this.selectCar.id }})
     },
     updateUserPosition(location, verb){
       var pos = {
@@ -326,3 +230,5 @@ export default {
 
 }
 </script>
+
+
