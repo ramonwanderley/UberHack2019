@@ -105,6 +105,17 @@
     dark
     max-width="100%"
   >
+   <v-btn
+              absolute
+              dark
+              fab
+              top
+              right
+              color="pink"
+              @click="readQRCode"
+            >
+              <v-icon>vpn_key</v-icon>
+            </v-btn>
     <v-card-title>
       <v-icon
         large
@@ -117,7 +128,7 @@
     </v-card-title>
 
     <v-card-text class="headline font-weight-bold">
-      "Turns out semicolon-less style is easier and safer in TS because most gotcha edge cases are type invalid as well."
+      {{this.startDate  + " - " + this.endDate  }}
     </v-card-text>
 
     <v-card-actions>
@@ -150,8 +161,16 @@
 </template>
 
 <script>
+
 import HelloWorld from './components/HelloWorld'
 import axios from 'axios'
+function getUserMedia(options, successCallback, failureCallback) {
+  var api = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+    navigator.mozGetUserMedia || navigator.msGetUserMedia;
+  if (api) {
+    return api.bind(navigator)(options, successCallback, failureCallback);
+  }
+}
 export default {
   name: 'App',
   components: {
@@ -233,15 +252,61 @@ export default {
   },
   computed: {
     startDate(){
-      var date = new Date(self.selectCar.startTime*1000);
-      var day = date.date();
+      if(this.selectCar.startTime != undefined ){
+      var date = new Date(this.selectCar.startTime*1000);
+      var day = date.getDate()
+      var month = date.getMonth()
       console.log(day)
       var hours = date.getHours();
       var minutes = "0" + date.getMinutes();
-      return( hours + ':' + minutes.substr(-2))
+      return( day+ "/" + month + ", " + hours + ':' + minutes.substr(-2))
+      }
+      else{
+        return "today"
+      }
+    },
+    endDate(){
+     if(this.selectCar.startTime != undefined ){
+      var date = new Date(this.selectCar.endTime*1000);
+      var day = date.getDate()
+      var month = date.getMonth()
+      var hours = date.getHours();
+      var minutes = "0" + date.getMinutes();
+      return( day+ "/" + month + ", " + hours + ':' + minutes.substr(-2))
+      }
+      else{
+        return "today"
+      } 
     }
   },
   methods: {
+    
+    readQRCode(){
+      console.log('dale')
+      if (!navigator.getUserMedia && !navigator.webkitGetUserMedia &&
+    !navigator.mozGetUserMedia && !navigator.msGetUserMedia) {
+    alert('User Media API not supported.');
+    return;
+  }
+  
+  var constraints = {
+    video: true
+  };
+
+  getUserMedia(constraints, function (stream) {
+    var mediaControl = document.querySelector('video');
+    if ('srcObject' in mediaControl) {
+      mediaControl.srcObject = stream;
+      mediaControl.src = (window.URL || window.webkitURL).createObjectURL(stream);
+    } else if (navigator.mozGetUserMedia) {
+      mediaControl.mozSrcObject = stream;
+    }
+    theStream = stream;
+  }, function (err) {
+    alert('Error: ' + err);
+  });
+  
+    },
     updateUserPosition(location, verb){
       var pos = {
               lat: location.coords.latitude,
